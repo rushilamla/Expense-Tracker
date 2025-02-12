@@ -1,14 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify  # ✅ Added jsonify
+
 import sqlite3
 import os
 import csv
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import send_file 
 
-
-app = Flask(__name__, template_folder="templates")  
-
-app.secret_key = "your_secret_key"
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 DB_PATH = "database.db"
 
 # Initialize Database
@@ -64,6 +63,20 @@ def index():
 
     return render_template('index.html', expenses=expenses, total_expense=total_expense, categories=categories, amounts=amounts)
 
+@app.route('/api/chart-data')
+def get_chart_data():
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT category, SUM(amount) FROM expenses WHERE user_id = ? GROUP BY category", (session['user_id'],))
+        category_data = cursor.fetchall()
+
+    categories = [row[0] for row in category_data]
+    amounts = [row[1] for row in category_data]
+
+    return jsonify({"categories": categories, "amounts": amounts})
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -185,4 +198,3 @@ if __name__ == "__main__":
     init_db()  # Ensure database is initialized
     port = int(os.environ.get("PORT", 5000))  # Use Render's assigned PORT
     app.run(host="0.0.0.0", port=port, debug=True)
-
