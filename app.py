@@ -5,8 +5,10 @@ import csv
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import send_file 
 
-app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+
+app = Flask(__name__, template_folder="templates")  
+
+app.secret_key = "your_secret_key"
 DB_PATH = "database.db"
 
 # Initialize Database
