@@ -10,23 +10,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
-        #chartContainer {
-            max-width: 90%;
-            width: 100%;
+        #barChart, #pieChart {
+            max-width: 600px !important;
+            max-height: 400px !important;
             margin: auto;
         }
-        #expenseChart {
-            width: 100% !important;
-            height: auto !important;
-            max-height: 400px;
-        }
     </style>
+    
 </head>
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#">Expense Tracker</a>
-            <a href="/logout" class="btn btn-danger">Logout</a>
+            <a href="https://expense-tracker-mjq2.onrender.com/logout" class="btn btn-danger">Logout</a>
         </div>
     </nav>
     <div class="container mt-4">
@@ -38,9 +34,12 @@
             <button class="btn btn-secondary" onclick="toggleChart('pie')">View Pie Chart</button>
         </div>
         
-        <div class="text-center mt-4" id="chartContainer" style="display: none;">
-            <canvas id="expenseChart" class="mb-4"></canvas>
+        <div class="text-center mt-4" id="chartContainer">
+            <canvas id="barChart" class="mb-4"></canvas>
+            <canvas id="pieChart" class="mb-4" style="display: none;"></canvas>
         </div>
+        
+        
         
         <script id="categories-data" type="application/json">{{ categories | tojson }}</script>
         <script id="amounts-data" type="application/json">{{ amounts | tojson }}</script>
@@ -52,23 +51,24 @@
 
             function toggleChart(type) {
                 var chartDiv = document.getElementById("chartContainer");
-                var canvas = document.getElementById("expenseChart");
+                var barCanvas = document.getElementById("barChart");
+                var pieCanvas = document.getElementById("pieChart");
 
-                // If clicking the same type, hide the chart
-                if (chartDiv.style.display === "block" && currentType === type) {
-                    chartDiv.style.display = "none";
-                    return;
-                }
-
-                chartDiv.style.display = "block";
-                currentType = type;
+                chartDiv.style.display = "block"; // Ensure container is shown
 
                 if (currentChart) {
                     currentChart.destroy();
                 }
 
-                loadChart(type);
+                let ctx = type === "bar" ? barCanvas.getContext("2d") : pieCanvas.getContext("2d");
+                let selectedCanvas = type === "bar" ? barCanvas : pieCanvas;
+
+                barCanvas.style.display = type === "bar" ? "block" : "none";
+                pieCanvas.style.display = type === "pie" ? "block" : "none";
+
+                loadChart(ctx, type);
             }
+
 
             function loadChart(type) {
                 const ctx = document.getElementById("expenseChart").getContext("2d");
@@ -102,7 +102,7 @@
         
         <div class="card p-4 shadow">
             <h3 class="text-center">Add New Expense</h3>
-            <form action="/add" method="post" class="row g-3">
+            <form action="https://expense-tracker-mjq2.onrender.com/add" method="post" class="row g-3">
                 <div class="col-md-4">
                     <input type="text" name="category" class="form-control" placeholder="Category (e.g. Food, Travel)" required>
                 </div>
@@ -135,17 +135,17 @@
                     <td>₹{{ expense[2] }}</td>
                     <td>{{ expense[3] }}</td>
                     <td>
-                        <a href="/delete/{{ expense[0] }}" class="btn btn-danger btn-sm">Delete</a>
+                        <a href="https://expense-tracker-mjq2.onrender.com/delete/{{ expense[0] }}" class="btn btn-danger btn-sm">Delete</a>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         <div class="text-center mt-4">
-            <form action="/reset" method="post" style="display: inline;">
+            <form action="https://expense-tracker-mjq2.onrender.com/reset" method="post" style="display: inline;">
                 <button type="submit" class="btn btn-danger">Reset All Expenses</button>
             </form>
-            <a href="/export" class="btn btn-success">Download CSV</a>
+            <a href="https://expense-tracker-mjq2.onrender.com/export" class="btn btn-success">Download CSV</a>
             <button class="btn btn-primary" onclick="generatePDF()">Download PDF</button>
         </div>
     </div>
