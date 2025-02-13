@@ -92,6 +92,13 @@ def register():
             except:
                 return "Username already exists!"
     return render_template('register.html')
+@app.route("/api/total-expense")
+def get_total_expense():
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT SUM(amount) FROM expenses")
+        total = cursor.fetchone()[0] or 0
+    return jsonify({"total_expense": total})
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
