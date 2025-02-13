@@ -59,8 +59,9 @@
         
         <script id="categories-data" type="application/json">{{ categories | tojson }}</script>
         <script id="amounts-data" type="application/json">{{ amounts | tojson }}</script>
-        <script src="{{ url_for('static', filename='chart.js') }}"></script>
-        <script src="{{ url_for('static', filename='pdf.js') }}"></script>
+        <script src="static/chart.js"></script>
+        <script src="static/pdf.js"></script>
+
         <script>
             let currentChart = null;
             let currentType = "bar";
